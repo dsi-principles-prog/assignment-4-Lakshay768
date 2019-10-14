@@ -1,0 +1,105 @@
+---
+title: "30-Feature Engineering"
+output: html_notebook
+---
+
+Creating a column to calculate the number of years a player has been playing in his current club
+
+Since the Joining date column is not in right format, I'm extracting the last 4 values from the end which is the year of joining and subtracting it from present year value.
+
+```{r}
+filtered_data<-filtered_data %>% 
+  mutate(years_playing=abs(as.numeric(str_sub(Joined,-4))-year(today())))
+```
+
+
+```{r}
+club_data<-filtered_data %>% 
+  filter(Club=="Real Madrid")
+```
+
+# Creating a column to find out the count of players which play in the same position of a given player in a football club.
+
+
+For this I took the "Position" column of each player, split the value with a "," and checked all the rows of "Position" column for a match with either of the positions of the player ,if they match then the count is incremented.
+```{r}
+
+ club_data$count_same_pos<-rep(NA,33)
+
+           for(i in 1:nrow(club_data))
+           {
+             value<-0
+             match<-str_split_fixed(club_data$Position,",",n=4)
+             for(j in 1 :nrow(club_data))
+             {
+               result<-str_detect(club_data[j,"Position"],pattern = fixed(match[i]))
+               if(sum(result,na.rm = TRUE)>=1){
+                value<- value+1
+               }
+               else{
+                 value<-value
+               }
+             }
+             club_data[i,"count_same_pos"]<-value
+           }
+  
+```
+# Creating a column to find out the player in the same position
+
+This column tells about which players play in the same position of a given player
+
+Again it uses string splitting and finds position of the player matching to another player and extracts their name then concatenates them.
+
+```{r}
+ club_data$player_same_pos<-rep(NA,33)
+
+           for(i in 1:nrow(club_data))
+           {
+             value<-""
+             match<-str_split_fixed(club_data$Position,",",n=4)
+             for(j in 1 :nrow(club_data))
+             {
+               result<-str_detect(club_data[j,"Position"],pattern = fixed(match[i]))
+               if(sum(result,na.rm = TRUE)>=1){
+                value<-str_c(value,club_data[j,"Name"],sep=",")
+               }
+               else{
+                 value<-value
+               }
+             }
+             club_data[i,"player_same_pos"]<-value
+           }
+```
+
+# Creating a column to find out which player has more overall than the player in discussion.
+
+
+```{r}
+club_data$more_Overall_same_pos<-rep(NA,33)
+
+           for(i in 1:nrow(club_data))
+           {
+             value<-""
+             match<-str_split_fixed(club_data$Position,",",n=4)
+             for(j in 1 :nrow(club_data))
+             {
+               result<-str_detect(club_data[j,"Position"],pattern = fixed(match[i]))
+               if((sum(result,na.rm = TRUE)>=1)){
+                 if(club_data[j,"Overall"]>club_data[i,"Overall"]){
+              
+                value<-str_c(value,club_data[j,"Name"],sep=",")
+                 }
+                 else{
+                 club_data[i,"more_Overall_same_pos"]<-club_data[i,"Name"]
+                 }
+               }
+             else{
+               value<-value
+             }
+             }
+             club_data[i,"more_Overall_same_pos"]<-value
+           }
+
+
+```
+

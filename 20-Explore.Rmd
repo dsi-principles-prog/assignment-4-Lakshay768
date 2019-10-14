@@ -1,0 +1,24 @@
+---
+title: "20-Explore"
+output: html_notebook
+---
+
+Findin out dimesnsions of the filtered data and printing first 6 rows of the data.
+
+```{r}
+dim(filtered_data)
+head(filtered_data)
+
+```
+
+Summary of the data
+```{r}
+summary(filtered_data)
+```
+
+with the help of summary we can get some basic info about the columns like mean age is 25, maximum overall of a player is 94 etc.
+
+```{r}
+
+```
+

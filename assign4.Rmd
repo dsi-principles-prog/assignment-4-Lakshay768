@@ -2,6 +2,12 @@
 title: "assign4"
 output: html_notebook
 ---
+```{r}
+library(tidyverse)
+library(lubridate)
+library(RVerbalExpressions)
+library(stringr)
+```
 
 
 For the regular expression exercises, try writing first using regular expressions directly, then try using rverbalexpressions. Provide the code for both. 
@@ -12,23 +18,158 @@ For the regular expression exercises, try writing first using regular expression
 
 Create a vector of dates giving the first day of every month in the current year. 
 
-Write a function that given your birthday (as a date), returns how old you are in years.
+```{r}
 
-Write a function that given your birthday, returns the day of the week you were born on. 
+#Floor_date when passed with "years" as a parameter floors the date to the the first date of the year to any date passed. and when used with "+" months(0:11) and then gets first date for each month.
+
+floor_date(today(),"years")+ months(0:11)
+
+
+# Another approach
+
+date_vector<-function(month="0",year="2019",day="01"){
+ month="0"
+ year="2019"
+ day="01"
+  dates<- rep(NA_real_,12)
+  date_123<- rep(NA_real_,12)
+  for(i in 1:12){
+    if(i<=9){
+      month<-str_c("0",i,sep="")}
+    else{
+    month<-i
+    }
+    dates[i]<- str_c(year,month,day,sep="-")
+  }
+for(j in 1:12){
+print(ymd(dates[j]))
+  
+}
+  date_123
+}
+
+date_vector()
+
+```
+
+
+Write a function that given your birthday (as a date), returns how old you are in years.
+```{r}
+age_finder<-function(birth_date){
+  date<-ymd(birth_date)
+  if(as.numeric(str_c(month(today()),day(today())))>as.numeric(str_c(month(date),day(date))))
+     {
+    age<- year(today())-year(date) 
+    }
+  else{
+     age<- year(today())-year(date) -1
+    }
+  age
+}
+
+
+age_finder(19970823)
+
+```
+
+
+Write a function that given your birthday, returns the day of the week you were born on.
+
+```{r}
+dayweek_bday<-function(birth_date){
+  dt<-ymd(birth_date)
+  wday(dt,label=TRUE,abbr = FALSE)
+}
+
+dayweek_bday(19970823)
+```
+
 
 ## R4DS 14.3.2.1
 
 Given the corpus of common words in stringr::words, create regular expressions that find all words that have seven letters or more. (Since this list is long, you might want to use the match argument to str_view() to show only the matching or non-matching words.)
+```{r}
+
+#Regular expressions
+strings<-stringr::words
+str_view(strings,".{7,}",match = TRUE)
+str_subset(strings,".{7,}")
+
+
+#Verbal expressions
+
+ x<-rx() %>% 
+  rx_start_of_line() %>% 
+  rx_alpha() %>% 
+  rx_multiple(min=7) %>% 
+   rx_end_of_line()
+ 
+ str_view(strings,x,match=TRUE)
+   
+```
+
 
 ## R4DS 14.3.3.1
 
 Use str_detect to find all words that:
 
 That only contain consonants. (Hint: thinking about matching “not”-vowels.)
+```{r}
+#Regular expressions
+words[str_detect(strings,"^[^aieouAIEOU]+$")]
+words[str_detect(strings,"[aieouAIEOU]+",negate = TRUE )]
+
+# Verbal expressions
+x<-rx() %>% 
+   rx_start_of_line() %>% 
+  rx_anything_but("aieouAIEOU") %>% 
+  rx_multiple(min=1) %>% 
+  rx_end_of_line()
+str_detect(strings,x)
+```
+
 
 Empirically verify the rule “i before e except after c”.
+```{r}
+#Regular expressions
+#words which follow rule
+strings[str_detect(strings,"[^c]ie")]
+
+#verbal expressions
+x<-rx() %>%  
+  rx_avoid_prefix("c") %>% 
+  rx_find("ie") 
+ 
+
+strings[str_detect(strings,x)]
+
+  
+
+```
+
 
 Create a regular expression that will match telephone numbers as commonly written in the US. Split this up into multiple expressions as needed.
+```{r}
+
+#Regular expression
+"^{3}[-]{3}[-]{4}$"
+"^{3}[.]{3}[.]{4}$"
+
+#Verbal expression
+phone_num<-rx() %>% 
+  rx_start_of_line() %>% 
+  rx_digit() %>% 
+  rx_repeat_previous(3) %>% 
+  rx_any_of("-.") %>% 
+  rx_digit() %>% 
+  rx_repeat_previous(3) %>% 
+  rx_any_of("-.") %>% 
+  rx_digit() %>% 
+  rx_repeat_previous(4) %>% 
+  rx_end_of_line()
+
+```
+
 
 # Part 2
 

@@ -1,0 +1,86 @@
+---
+title: "10-Import data"
+output: html_notebook
+---
+
+# Import libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(assertr)
+library(stringr)
+library(lubridate)
+```
+
+# About the data
+ 
+This dataset is collected from Kaggle which was scraped from https://sofifa.com/. 
+
+The dataset is FIFA 20 complete player dataset. This dataset has all the information about the football players which are gonna be a part of the game FIFA 20.
+
+FIFA 20 players data consisting of over 18K players information and about 70 attributes including name, age, overall, value, position, etc.
+
+
+# Defining the problem
+
+Predicting which players might leave their clubs.
+
+Predicting this would involve factors such as 
+
+1. Player age
+
+2. Date when the player joined the club
+
+
+3. Are there other players playing in the position he plays ?
+
+4. What are his wages and is the player being paid to his actual value. Wages relative to other players.
+
+5. The other players who play in his position have they scored more goals in their career?
+
+6. Release clause of the player. Release clause is the amount of money a club will have to pay to buy the player from his current club even when his contract with his current club has not expired. It's like the fee which you have to pay to break the lease.
+
+7. Whether the player available in their postion has high potential
+
+
+# Import dataset
+
+Reading and checking in data 
+
+Check conditions:
+
+1. Checking if Name of the player,The country and club they play for, the position,The date they joined their current club they play in and their wages and Release Clause are all character type or not.
+
+2. Checking whether age is in bounds from 10 to 50 years
+
+3. Checking for null values of ID and name
+
+4. Checking whether Age, Overall score of a player(out of 100), Hits(Goals scored by them), Potential score are all numeric.
+
+
+
+```{r}
+fifa20_data <- read_csv("fifa20_data.csv") %>% 
+  assert(is.character,Name,Country,Position,Club,Wage,`Release Clause`,Joined) %>% 
+  assert(within_bounds(10,50),Age) %>% 
+  assert(not_na,ID,Name) %>% 
+  assert(is.numeric,Age,Overall,Hits,Potential)
+```
+
+# Data cleaning 
+
+Since the assertr stooped execution for Hits column , I will change thetype from character to numeric for this column
+```{r}
+fifa20_data$Hits<-as.numeric(fifa20_data$Hits)
+```
+
+# Filtering the data and taking columns which we will need for the problem
+
+I have selected 12 attributes out of 70 attributes for my problem.
+
+```{r}
+filtered_data<-fifa20_data %>% 
+  select(Name,Position,Age,Overall,Potential,Club,BP,Joined,Value,Wage,`Release Clause`,Hits)
+```
+
